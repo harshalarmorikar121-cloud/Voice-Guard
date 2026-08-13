@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Voice-Guard USB Device Configurator</title>
+    
+    <!-- PWA Manifest for App Installation -->
+    <meta name="theme-color" content="#070912">
+    <link rel="manifest" href="manifest.json">
+
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- Floating Action Buttons -->
+    <div class="top-nav">
+        <button class="nav-btn" onclick="openModal('supportModal')">💬 Support & Feedback</button>
+        <button class="nav-btn" onclick="openModal('howToModal')">📖 How to Use</button>
+        <button class="nav-btn highlight" onclick="openModal('bookModal')">🛒 Book Device</button>
+    </div>
+
+    <!-- Animated Background Theme Elements -->
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+    <div class="blob blob-3"></div>
+
+    <div class="app-card">
+
+        <!-- Header -->
+        <div class="app-header">
+            <span class="app-badge">Secure Device Provisioning</span>
+            <h1 class="app-title">Voice-Guard</h1>
+            <p class="app-subtitle">Register emergency contacts directly onto your Voice-Guard hardware device via USB cable.</p>
+        </div>
+
+        <!-- Wizard Progress Bar -->
+        <div class="wizard-steps">
+            <div class="step-item active" id="stepIndicator1">
+                <div class="step-number">1</div>
+                <div class="step-label">Connect USB</div>
+            </div>
+            <div class="step-item" id="stepIndicator2">
+                <div class="step-number">2</div>
+                <div class="step-label">Enter Contacts</div>
+            </div>
+            <div class="step-item" id="stepIndicator3">
+                <div class="step-number">3</div>
+                <div class="step-label">OTP Verify</div>
+            </div>
+            <div class="step-item" id="stepIndicator4">
+                <div class="step-number">4</div>
+                <div class="step-label">Finish</div>
+            </div>
+        </div>
+
+        <!-- STEP 1: Connect USB Device -->
+        <div class="wizard-content" id="stepContent1">
+            <h3 style="margin-bottom: 12px; font-family: 'Outfit'; color: white;">Step 1: Plug in your Voice-Guard</h3>
+            <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 20px;">
+                Connect your Voice-Guard safety device to your computer using a USB cable. Then click the button below to pair the USB COM port.
+            </p>
+
+            <div style="text-align: center; margin: 30px 0;">
+                <button class="btn btn-connect" id="btnConnect" onclick="connectUSBDevice()">
+                    🔌 Pair & Connect USB Device
+                </button>
+            </div>
+
+            <div id="connStatusText" style="text-align: center; font-weight: 600; font-size: 0.9rem; color: var(--accent-rose);">
+                Status: Device Not Connected
+            </div>
+        </div>
+
+        <!-- STEP 2: Enter Emergency Numbers -->
+        <div class="wizard-content" id="stepContent2" style="display: none;">
+            <h3 style="margin-bottom: 12px; font-family: 'Outfit'; color: white;">Step 2: Enter Emergency Phone Numbers</h3>
+            <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 20px;">
+                These numbers will receive instant SMS location alerts and phone calls when the Voice-Guard SOS button is pressed.
+            </p>
+
+            <div class="form-group">
+                <label for="primaryNumber">Primary Guardian Mobile Number *</label>
+                <input type="tel" id="primaryNumber" placeholder="+919876543210" required>
+                <span style="font-size: 0.8rem; color: var(--text-muted);">Must include country code (e.g. +91)</span>
+            </div>
+
+            <div class="form-group">
+                <label for="secondaryNumber">Secondary Backup Number (Optional)</label>
+                <input type="tel" id="secondaryNumber" placeholder="+919876543211">
+            </div>
+        </div>
+
+        <!-- STEP 3: OTP Verification -->
+        <div class="wizard-content" id="stepContent3" style="display: none;">
+            <h3 style="margin-bottom: 12px; font-family: 'Outfit'; color: white;">Step 3: OTP Verification</h3>
+            <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 20px;">
+                An OTP has been sent to your primary number via Voice-Guard SMS. Please enter the 4-digit code below to verify ownership.
+            </p>
+
+            <div class="form-group" style="text-align: center;">
+                <label for="otpInput">Enter 4-Digit OTP Code</label>
+                <input type="text" id="otpInput" placeholder="1234" maxlength="4" style="text-align: center; font-size: 1.5rem; letter-spacing: 5px; width: 150px; margin: 0 auto;" required>
+            </div>
+            
+            <div style="text-align: center; margin-top: 20px;">
+                <button class="btn btn-connect" id="btnVerifyOTP" onclick="verifyOTP()">
+                    Verify OTP Code
+                </button>
+            </div>
+        </div>
+
+        <!-- STEP 4: Burn & Test -->
+        <div class="wizard-content" id="stepContent4" style="display: none;">
+            <h3 style="margin-bottom: 12px; font-family: 'Outfit'; color: white;">Step 4: Registration Complete</h3>
+            <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 20px;">
+                OTP verified successfully! Click the button below to flash these numbers securely into the Voice-Guard memory.
+            </p>
+
+            <div style="background: rgba(16, 185, 129, 0.1); border-left: 4px solid var(--accent-green); padding: 16px; border-radius: 8px; margin-bottom: 20px;">
+                <div style="font-weight: 700; color: var(--accent-green);" id="summaryNum1">Primary: +919876543210</div>
+                <div style="font-size: 0.85rem; color: var(--text-muted);" id="summaryNum2">Secondary: +919876543211</div>
+            </div>
+
+            <div style="text-align: center;">
+                <button class="btn btn-primary" id="btnBurn" onclick="burnToFlashMemory()" style="width: 100%; justify-content: center;">
+                    ⚡ Save & Program Numbers to Device
+                </button>
+            </div>
+        </div>
+
+        <!-- Navigation Buttons -->
+        <div class="btn-row">
+            <button class="btn btn-secondary" id="btnBack" onclick="prevStep()" disabled>
+                ⬅️ Back
+            </button>
+            <button class="btn btn-primary" id="btnNext" onclick="nextStep()" disabled>
+                Next Step ➡️
+            </button>
+        </div>
+
+        <!-- Live USB Terminal Logs -->
+        <div class="log-box" id="terminalLog">
+            [SYS] Voice-Guard Registrar Ready. Plug in device via USB.
+        </div>
+
+    </div>
+
+    <script src="configurator.js"></script>
+
+    <!-- Modals -->
+    <div id="supportModal" class="modal-overlay" onclick="closeModal(event, 'supportModal')">
+        <div class="modal-content">
+            <span class="close-btn" onclick="forceClose('supportModal')">&times;</span>
+            <h2>Support & Feedback</h2>
+            <p style="color: var(--text-muted); margin-bottom: 20px;">Report an issue with your device/app, or leave us some feedback!</p>
+            <form id="supportForm" onsubmit="handleSupportSubmit(event)">
+                <div class="form-group">
+                    <label>Submission Type</label>
+                    <select id="supportType" required style="background: rgba(0, 0, 0, 0.4); border: 1px solid rgba(255,255,255,0.1); color: var(--text-main); padding: 14px 16px; border-radius: 10px; font-size: 1rem; outline: none; margin-bottom: 5px;">
+                        <option value="" disabled selected>Select an option...</option>
+                        <option value="issue_device" style="background: #0f172a;">Report a Hardware Issue</option>
+                        <option value="issue_app" style="background: #0f172a;">Report an App/Web Issue</option>
+                        <option value="feedback" style="background: #0f172a;">General Feedback</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Message</label>
+                    <textarea id="supportMessage" required placeholder="Describe your issue or share your feedback here..." rows="4" style="background: rgba(0, 0, 0, 0.4); border: 1px solid rgba(255,255,255,0.1); color: var(--text-main); padding: 14px 16px; border-radius: 10px; font-size: 1rem; font-family: inherit; outline: none; resize: vertical;"></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center; margin-top: 10px;">Submit Response</button>
+            </form>
+
+            <div id="supportSuccess" style="display: none; text-align: center; color: var(--accent-green); padding: 20px; font-weight: bold;">
+                ✅ Thank you! Your submission has been received.
+            </div>
+        </div>
+    </div>
+    <div id="howToModal" class="modal-overlay" onclick="closeModal(event, 'howToModal')">
+        <div class="modal-content">
+            <span class="close-btn" onclick="forceClose('howToModal')">&times;</span>
+            <h2>How to Use Voice-Guard</h2>
+            <div class="instructions-list">
+                <div class="instruction-step">
+                    <strong style="color: var(--accent-cyan);">1. Charge the Device:</strong> Ensure your Voice-Guard has battery by connecting it to a standard USB charger.
+                </div>
+                <div class="instruction-step">
+                    <strong style="color: var(--accent-purple);">2. Register Contacts:</strong> Use this app to pair the device via USB and save your emergency contacts securely to the hardware.
+                </div>
+                <div class="instruction-step">
+                    <strong style="color: var(--accent-rose);">3. Stay Protected:</strong> Carry the device with you. In an emergency, press and hold the SOS button. It will immediately use the built-in SIM to send SMS alerts with your location!
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="bookModal" class="modal-overlay" onclick="closeModal(event, 'bookModal')">
+        <div class="modal-content">
+            <span class="close-btn" onclick="forceClose('bookModal')">&times;</span>
+            <h2>Book Your Voice-Guard</h2>
+            <p style="color: var(--text-muted); margin-bottom: 20px;">Reserve the ultimate standalone women's safety device today. Ships worldwide.</p>
+            <form id="bookingForm" onsubmit="handleBookingSendOTP(event)">
+                <div class="form-group">
+                    <label>Full Name</label>
+                    <input type="text" id="bookName" required placeholder="Jane Doe">
+                </div>
+                <div class="form-group">
+                    <label>Mobile Number (For OTP Verification)</label>
+                    <input type="tel" id="bookPhone" required placeholder="+919876543210">
+                </div>
+                <div class="form-group">
+                    <label>Shipping Address</label>
+                    <input type="text" id="bookAddress" required placeholder="123 Safety St, City">
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center; margin-top: 10px;">Send Verification OTP</button>
+            </form>
+
+            <form id="bookingOTPForm" style="display: none;" onsubmit="handleBookingVerifyOTP(event)">
+                <div class="form-group" style="text-align: center;">
+                    <label>Enter 4-Digit OTP sent to your Mobile</label>
+                    <input type="text" id="bookOTPInput" required placeholder="1234" maxlength="4" style="text-align: center; font-size: 1.5rem; letter-spacing: 5px; width: 150px; margin: 0 auto;">
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center; margin-top: 10px;">Verify & Confirm Booking</button>
+            </form>
+
+            <div id="bookingSuccess" style="display: none; text-align: center; color: var(--accent-green); padding: 20px; font-weight: bold;">
+                🎉 OTP Verified & Booking Confirmed! We will contact you soon.
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>

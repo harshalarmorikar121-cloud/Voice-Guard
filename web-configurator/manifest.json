@@ -1,0 +1,16 @@
+{
+  "name": "Voice-Guard Configurator",
+  "short_name": "Voice-Guard",
+  "description": "USB Provisioning Tool for Voice-Guard Safety Device",
+  "start_url": "index.html",
+  "display": "standalone",
+  "background_color": "#070912",
+  "theme_color": "#00d2ff",
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/2091/2091665.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
